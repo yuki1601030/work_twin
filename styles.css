@@ -1290,3 +1290,205 @@ h4 { margin-bottom: 10px; color: var(--muted); font-size: 13px; }
 .before-after-grid span { display: block; color: var(--muted); font-size: 11px; font-weight: 900; }
 .before-after-grid strong { display: block; margin-top: 6px; color: var(--navy); font-size: 17px; }
 @media (max-width: 760px) { .before-after-grid { grid-template-columns: 1fr; } }
+
+.map-canvas {
+  position: relative;
+  min-width: 100%;
+  min-height: 100%;
+  transition: width .28s ease-out, height .28s ease-out;
+}
+
+.map-canvas .city-map {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  transition: transform .28s ease-out;
+}
+
+.city-scroll {
+  position: relative;
+  cursor: grab;
+}
+
+.city-scroll.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.city-scroll.is-dragging * { cursor: grabbing !important; }
+
+.zoom-control {
+  position: sticky;
+  z-index: 60;
+  left: calc(100% - 152px);
+  bottom: 14px;
+  display: grid;
+  gap: 7px;
+  width: 138px;
+  margin: -198px 14px 14px auto;
+  border: 1px solid rgba(40,119,212,.16);
+  border-radius: 18px;
+  background: rgba(255,255,255,.82);
+  padding: 10px;
+  box-shadow: 0 14px 34px rgba(24,49,79,.13);
+  backdrop-filter: blur(12px);
+  cursor: default;
+}
+
+.zoom-mode-label {
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(40,119,212,.10), rgba(139,220,153,.18));
+  padding: 5px 8px;
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.zoom-button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.zoom-control button {
+  border: 1px solid rgba(40,119,212,.14);
+  border-radius: 12px;
+  background: rgba(255,255,255,.86);
+  padding: 7px 8px;
+  color: #31516f;
+  font-size: 12px;
+  font-weight: 900;
+  transition: transform .18s ease-out, background .18s ease-out, box-shadow .18s ease-out;
+}
+
+.zoom-control button:hover,
+.zoom-control button.is-active {
+  background: #eef7ff;
+  box-shadow: 0 8px 18px rgba(40,119,212,.10);
+  transform: translateY(-1px);
+}
+
+.zoom-control span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.city-map.zoom-overview .central-plaza span,
+.city-map.zoom-overview .district-scene-note,
+.city-map.zoom-overview .house,
+.city-map.zoom-overview .vacancy-house,
+.city-map.zoom-overview .twin-road,
+.city-map.zoom-overview .transfer-road,
+.city-map.zoom-overview .voice-bubble,
+.city-map.zoom-overview .road-dot:not(.area-dot) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.city-map.zoom-overview .district {
+  filter: saturate(1.04);
+}
+
+.city-map.zoom-overview .district-name {
+  font-size: 18px;
+  padding: 10px 14px;
+}
+
+.city-map.zoom-overview .area-signpost {
+  transform: translateY(-50%) scale(1.08);
+  opacity: 1;
+}
+
+.city-map.zoom-overview .area-signpost span {
+  font-size: 10px;
+}
+
+.city-map.zoom-overview .empty-room-marker {
+  opacity: .96;
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.city-map.zoom-overview .area-main {
+  opacity: .72;
+  stroke-width: 6;
+}
+
+.city-map.zoom-overview .district.mood-alert,
+.city-map.zoom-overview .district.risk-high {
+  box-shadow: inset 0 0 0 2px rgba(255, 125, 94, .20), 0 20px 46px rgba(255, 125, 94, .13);
+}
+
+.city-map.zoom-standard .name-full,
+.city-map.zoom-standard .home-area-label {
+  display: none;
+}
+
+.city-map.zoom-detail .house {
+  width: 126px;
+}
+
+.city-map.zoom-detail .name-short {
+  display: none;
+}
+
+.city-map.zoom-detail .name-full {
+  display: inline;
+}
+
+.city-map.zoom-detail .home-body {
+  min-height: 104px;
+  padding: 11px 10px 10px;
+}
+
+.city-map.zoom-detail .home-body strong {
+  font-size: 12px;
+}
+
+.city-map.zoom-detail .home-body small,
+.city-map.zoom-detail .home-body em,
+.city-map.zoom-detail .home-area-label {
+  display: block;
+  max-width: 104px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.city-map.zoom-detail .home-area-label {
+  color: #6b7b8f;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.city-map.zoom-detail .voice-bubble,
+.city-map.zoom-detail.layer-voice-on .house .voice-bubble {
+  opacity: .94;
+  transform: translateX(-50%) translateY(0);
+}
+
+.city-map.zoom-detail .vacancy-house em {
+  max-height: 42px;
+  opacity: 1;
+  margin-top: 4px;
+}
+
+.city-map.zoom-detail:not(.layer-collaboration-off) .twin-road.cross-area,
+.city-map.zoom-detail:not(.layer-collaboration-off) .twin-road.same-area {
+  opacity: .22;
+}
+
+.city-map.zoom-detail.has-focus-context .twin-road.is-related,
+.city-map.zoom-detail .road:hover {
+  opacity: .88;
+}
+
+@media (max-width: 760px) {
+  .zoom-control {
+    left: calc(100% - 132px);
+    width: 120px;
+  }
+}
