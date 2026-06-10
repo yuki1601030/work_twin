@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Work Twin City | 未来の人材OS</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero-card">
+        <div>
+          <p class="eyebrow">Future HR OS Concept Mock</p>
+          <h1>Work Twin City</h1>
+          <p class="hero-copy">
+            会社を「街」として眺め、社員一人ひとりのWork Twinを家として育てる。
+            評価・配置・異動・キャリア形成を、本人主導の成果証跡から温かく可視化します。
+          </p>
+        </div>
+        <div class="principles" aria-label="プロダクト思想">
+          <span>監視ではなく本人主導</span>
+          <span>生ログではなくAI要約</span>
+          <span>働くほどTwinが育つ</span>
+        </div>
+      </section>
+
+      <section class="layout-grid">
+        <section class="city-panel" aria-labelledby="map-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Company Map</p>
+              <h2 id="map-title">会社全体の街マップ</h2>
+            </div>
+            <div class="legend">
+              <span><i class="legend-house"></i>Work Twinの家</span>
+              <span><i class="legend-vacancy"></i>空き部屋</span>
+              <span><i class="legend-road"></i>協業の道</span>
+            </div>
+          </div>
+
+          <div class="city-map" id="cityMap" aria-label="Work Twin City map">
+            <svg class="roads" viewBox="0 0 1000 720" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M168 202 C 330 92, 462 142, 555 237 S 772 365, 862 235" />
+              <path d="M252 496 C 402 385, 502 396, 598 470 S 758 588, 858 488" />
+              <path d="M356 173 C 385 322, 382 425, 310 572" />
+              <path d="M675 145 C 647 284, 654 401, 712 586" />
+              <circle cx="502" cy="358" r="76" />
+            </svg>
+            <div class="pulse-flow flow-a"></div>
+            <div class="pulse-flow flow-b"></div>
+            <div class="pulse-flow flow-c"></div>
+          </div>
+        </section>
+
+        <aside class="side-panel" aria-live="polite">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Selected Twin</p>
+              <h2 id="detailTitle">Work Twin詳細</h2>
+            </div>
+            <span class="privacy-badge">架空データ</span>
+          </div>
+
+          <div id="detailPanel" class="detail-card"></div>
+
+          <div class="report-actions">
+            <button id="generateReport" class="primary-button">半期成果レポートを生成</button>
+            <p>評価シートを書くのではなく、Work TwinからAI要約の成果レポートを生成します。</p>
+          </div>
+
+          <div id="reportPanel" class="report-card is-empty">
+            <h3>半期成果レポート</h3>
+            <p>ボタンを押すと、選択中のWork Twinの成果証跡からレポート案が表示されます。</p>
+          </div>
+
+          <div class="move-card">
+            <div class="move-header">
+              <div>
+                <p class="eyebrow">Moving Candidates</p>
+                <h3>引っ越し候補</h3>
+              </div>
+              <span>社内公募 = 入居者募集</span>
+            </div>
+            <div id="moveCandidates" class="move-list"></div>
+          </div>
+        </aside>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>
