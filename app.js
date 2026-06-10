@@ -1,13 +1,69 @@
 const cityData = {
   areas: [
-    { id: 'dev', name: '開発区', icon: '🧪', theme: 'blue', x: 80, y: 90, width: 520, height: 390, status: 'プロダクトの基盤と体験をつくるラボ群。レビューの小道が多く、他区との協業が絶えない。' },
-    { id: 'planning', name: '事業企画区', icon: '🧭', theme: 'green', x: 680, y: 80, width: 500, height: 360, status: '顧客課題と事業仮説を練る企画スタジオ街。データ分析区・営業区への橋が太い。' },
-    { id: 'hr', name: '人事区', icon: '🌱', theme: 'mint', x: 1260, y: 90, width: 470, height: 380, status: '育成・評価・組織開発を支えるコミュニティ広場。すべての区へ対話の道が伸びる。' },
-    { id: 'newbiz', name: '新規事業区', icon: '🚀', theme: 'sky', x: 120, y: 570, width: 510, height: 400, status: 'PoCガレージや検証ロフトが並ぶ実験都市。空き部屋の入れ替わりが活発。' },
-    { id: 'data', name: 'データ分析区', icon: '📊', theme: 'violet', x: 730, y: 560, width: 470, height: 380, status: '指標・予測・可視化のデータタワー街。事業判断を照らす灯台の役割を担う。' },
-    { id: 'sales', name: '営業区', icon: '🏪', theme: 'orange', x: 1310, y: 570, width: 500, height: 390, status: '顧客接点が集まるマーケット街。提案知見が企画区とCS区へ流れていく。' },
-    { id: 'cs', name: 'カスタマーサクセス区', icon: '💬', theme: 'aqua', x: 330, y: 1060, width: 520, height: 380, status: '相談カウンターと伴走拠点が連なる港町。顧客の声を街全体へ届ける。' },
-    { id: 'factory', name: '製造・現場改善区', icon: '🏭', theme: 'lime', x: 1010, y: 1060, width: 540, height: 400, status: '現場改善のファクトリー街。安全・品質・効率化の知見がほかの区へ輸送される。' },
+    {
+      id: 'dev', areaName: '開発区', name: '開発区', icon: '🧪', theme: 'blue', x: 80, y: 90, width: 520, height: 390,
+      memberCount: 8, requiredHeadcount: 10, monthlyOvertimeHours: 320, plannedManMonths: 9.6, actualManMonths: 12.8, workloadRate: 133, outputScore: 86, collaborationScore: 92, vacancyCount: 2, riskLevel: 'high', statusLabel: '過負荷・要支援',
+      status: 'プロダクトの基盤と体験をつくるラボ群。夜遅くまでレビュー灯がともり、協業の道が太く混み合う。',
+      mainIssues: ['レビュー待ちが集中し、夕方以降もラボの明かりが残りやすい', 'フロントエンドと基盤改善の兼務が増え、工数が計画を超過'],
+      recommendedAction: 'レビュー負荷が高いため、フロントエンド経験者と基盤改善を担える人材を追加する。',
+      transferCandidates: ['水野あおい（PdM観点でレビュー論点整理）', '日比野あかり（品質改善支援）']
+    },
+    {
+      id: 'planning', areaName: '事業企画区', name: '事業企画区', icon: '🧭', theme: 'green', x: 680, y: 80, width: 500, height: 360,
+      memberCount: 6, requiredHeadcount: 6, monthlyOvertimeHours: 120, plannedManMonths: 6.4, actualManMonths: 6.8, workloadRate: 106, outputScore: 78, collaborationScore: 88, vacancyCount: 1, riskLevel: 'medium', statusLabel: '協業活発',
+      status: '顧客課題と事業仮説を練る企画スタジオ街。データ分析区・営業区への橋が太い。',
+      mainIssues: ['相談の入口が多く、優先順位の交通整理が必要', '仮説検証から投資判断への接続をさらに強めたい'],
+      recommendedAction: '横断案件の入口を週次で整理し、データ分析区との共同テーマを絞り込む。',
+      transferCandidates: ['結城みなと（営業知見の翻訳）', '藤見そら（業務設計支援）']
+    },
+    {
+      id: 'hr', areaName: '人事区', name: '人事区', icon: '🌱', theme: 'mint', x: 1260, y: 90, width: 470, height: 380,
+      memberCount: 5, requiredHeadcount: 5, monthlyOvertimeHours: 80, plannedManMonths: 5.2, actualManMonths: 5.0, workloadRate: 96, outputScore: 74, collaborationScore: 76, vacancyCount: 0, riskLevel: 'low', statusLabel: '安定',
+      status: '育成・評価・組織開発を支える緑の多いコミュニティ広場。落ち着いた余白がある。',
+      mainIssues: ['制度運用は安定しているが、他部署支援の見える化が次のテーマ', '繁忙期に備えた相談窓口の分散が必要'],
+      recommendedAction: '安定しているため、他部署支援候補を検討しつつ繁忙期の備えを整える。',
+      transferCandidates: ['桜井ゆい（育成設計）', '小馬はる（オンボーディング支援）']
+    },
+    {
+      id: 'newbiz', areaName: '新規事業区', name: '新規事業区', icon: '🚀', theme: 'sky', x: 120, y: 570, width: 510, height: 400,
+      memberCount: 4, requiredHeadcount: 7, monthlyOvertimeHours: 210, plannedManMonths: 5.8, actualManMonths: 7.4, workloadRate: 128, outputScore: 82, collaborationScore: 84, vacancyCount: 3, riskLevel: 'high', statusLabel: '人材不足',
+      status: 'PoCガレージや検証ロフトが並ぶ実験都市。活気は強いが、空き部屋と入居者募集が目立つ。',
+      mainIssues: ['PoCの同時進行で意思決定資料と顧客検証が不足', 'PdM / BA人材が足りず、夜のガレージ灯が増えている'],
+      recommendedAction: 'PdM / BA人材を2名募集し、検証テーマを支援できる兼務者も募る。',
+      transferCandidates: ['水野あおい（PdM）', '藤見そら（BA）', '森野かい（UI実装）']
+    },
+    {
+      id: 'data', areaName: 'データ分析区', name: 'データ分析区', icon: '📊', theme: 'violet', x: 730, y: 560, width: 470, height: 380,
+      memberCount: 3, requiredHeadcount: 6, monthlyOvertimeHours: 180, plannedManMonths: 4.6, actualManMonths: 6.3, workloadRate: 137, outputScore: 90, collaborationScore: 91, vacancyCount: 3, riskLevel: 'high', statusLabel: '急成長・人材不足',
+      status: '指標・予測・可視化のデータタワー街。成果の光は強いが、分析依頼が急増して空きフロアが多い。',
+      mainIssues: ['分析依頼が急増し、データ整備と可視化が同じ人に集中', '成果は高いが人員不足により持続性リスクがある'],
+      recommendedAction: '分析依頼が急増しているため、データ可視化・データエンジニア兼務者を募集する。',
+      transferCandidates: ['青葉ひなた（イベント設計）', '結城みなと（KPI設計）', '白川いおり（需要分析）']
+    },
+    {
+      id: 'sales', areaName: '営業区', name: '営業区', icon: '🏪', theme: 'orange', x: 1310, y: 570, width: 500, height: 390,
+      memberCount: 7, requiredHeadcount: 8, monthlyOvertimeHours: 160, plannedManMonths: 7.6, actualManMonths: 8.5, workloadRate: 112, outputScore: 84, collaborationScore: 79, vacancyCount: 1, riskLevel: 'medium', statusLabel: '商談増加',
+      status: '顧客接点が集まるマーケット街。提案知見が流れ、夕方の商店街に少し混雑が出ている。',
+      mainIssues: ['大型商談が増え、提案設計の準備時間が膨らみやすい', '企画区への知見共有を定例化したい'],
+      recommendedAction: 'エンタープライズ提案の型化を進め、企画区と共同で提案素材を整える。',
+      transferCandidates: ['結城みなと（提案設計）', '水野あおい（価格検証）']
+    },
+    {
+      id: 'cs', areaName: 'カスタマーサクセス区', name: 'カスタマーサクセス区', icon: '💬', theme: 'aqua', x: 330, y: 1060, width: 520, height: 380,
+      memberCount: 6, requiredHeadcount: 7, monthlyOvertimeHours: 140, plannedManMonths: 6.9, actualManMonths: 7.2, workloadRate: 104, outputScore: 76, collaborationScore: 82, vacancyCount: 1, riskLevel: 'medium', statusLabel: '伴走強化',
+      status: '相談カウンターと伴走拠点が連なる港町。顧客の声を街全体へ届ける道が広がる。',
+      mainIssues: ['問い合わせ分類とオンボーディング改善の両立に支援が必要', '顧客の声を開発テーマへ翻訳する役割を増やしたい'],
+      recommendedAction: '顧客インサイト分析の兼務者を置き、企画区・開発区へ声を届ける橋を太くする。',
+      transferCandidates: ['藤見そら（業務設計）', '七海ゆず（問い合わせ分析）']
+    },
+    {
+      id: 'factory', areaName: '製造・現場改善区', name: '製造・現場改善区', icon: '🏭', theme: 'lime', x: 1010, y: 1060, width: 540, height: 400,
+      memberCount: 9, requiredHeadcount: 9, monthlyOvertimeHours: 95, plannedManMonths: 9.2, actualManMonths: 8.9, workloadRate: 97, outputScore: 80, collaborationScore: 70, vacancyCount: 1, riskLevel: 'low', statusLabel: '安定運用',
+      status: '現場改善のファクトリー街。緑の物流路が整い、安全・品質・効率化の知見が穏やかに流れる。',
+      mainIssues: ['品質改善の知見をプロダクト側へ還流する仕組みを増やしたい', '計画変更時の分析支援をさらに軽くしたい'],
+      recommendedAction: '安定運用を保ちながら、品質改善推進と計画改善の支援枠をゆるやかに探す。',
+      transferCandidates: ['朝日りく（テスト設計）', '暁けい（業務改善）']
+    },
   ],
   twins: [
     { id: 'aoi-mizuno', name: '水野あおい', role: 'PdM', area: 'planning', houseType: 'planning-studio', x: 780, y: 190, skills: ['課題設定', 'ロードマップ', '意思決定資料'], achievements: ['顧客課題を5テーマに整理し次期ロードマップ案へ反映', '価格検証の判断材料を1枚のストーリーに統合'], contribution: '開発区・営業区の論点を翻訳し、議論の迷子を減らした。', growthTheme: '定量指標を用いた優先順位付け', collaborationIds: ['kai-morino', 'ren-kisaragi', 'mio-tachibana'], evaluationSummary: '事業仮説を具体的な検証単位に分解し、関係者の合意形成を前進させた。', relocationMatches: ['vac-data-product', 'vac-newbiz-poc'] },
@@ -58,6 +114,8 @@ const cityMap = document.getElementById('cityMap');
 const detailTitle = document.getElementById('detailTitle');
 const detailPanel = document.getElementById('detailPanel');
 const moveCandidates = document.getElementById('moveCandidates');
+const companySummary = document.getElementById('companySummary');
+const areaCards = document.getElementById('areaCards');
 const reportPanel = document.getElementById('reportPanel');
 const generateReport = document.getElementById('generateReport');
 
@@ -66,6 +124,81 @@ let selectedId = cityData.twins[0].id;
 
 const areaById = Object.fromEntries(cityData.areas.map((area) => [area.id, area]));
 const twinById = Object.fromEntries(cityData.twins.map((twin) => [twin.id, twin]));
+const riskLabels = { high: '高', medium: '中', low: '低' };
+
+function headcountShortage(area) {
+  return Math.max(area.requiredHeadcount - area.memberCount, 0);
+}
+
+function manMonthOverrun(area) {
+  return Math.max(area.actualManMonths - area.plannedManMonths, 0);
+}
+
+function areaMood(area) {
+  if (area.riskLevel === 'high') return 'mood-alert';
+  if (area.riskLevel === 'medium') return 'mood-busy';
+  return 'mood-calm';
+}
+
+function companyMetrics() {
+  const totalMembers = cityData.areas.reduce((sum, area) => sum + area.memberCount, 0);
+  const totalVacancies = cityData.areas.reduce((sum, area) => sum + area.vacancyCount, 0);
+  const overloadedAreas = cityData.areas.filter((area) => area.riskLevel === 'high' || area.workloadRate >= 120).length;
+  const overtimeTotal = cityData.areas.reduce((sum, area) => sum + area.monthlyOvertimeHours, 0);
+  const shortageTotal = cityData.areas.reduce((sum, area) => sum + headcountShortage(area), 0);
+  const transferMatchCount = cityData.vacancies.reduce((sum, vacancy) => sum + vacancy.recommendedResidents.length, 0);
+  const averageWorkload = cityData.areas.reduce((sum, area) => sum + area.workloadRate, 0) / cityData.areas.length;
+  const averageOutput = cityData.areas.reduce((sum, area) => sum + area.outputScore, 0) / cityData.areas.length;
+  const healthScore = Math.max(0, Math.round(100 - (averageWorkload - 100) * 0.65 - overloadedAreas * 4 - shortageTotal * 1.8 + (averageOutput - 75) * 0.35));
+
+  return { totalMembers, totalVacancies, overloadedAreas, overtimeTotal, shortageTotal, transferMatchCount, healthScore };
+}
+
+function renderCompanySummary() {
+  const metrics = companyMetrics();
+  companySummary.innerHTML = [
+    ['総社員数', `${metrics.totalMembers}名`],
+    ['空き部屋数', `${metrics.totalVacancies}室`],
+    ['過負荷エリア数', `${metrics.overloadedAreas}区`],
+    ['月間残業時間合計', `${metrics.overtimeTotal}h`],
+    ['人材不足人数', `${metrics.shortageTotal}名`],
+    ['異動候補マッチ数', `${metrics.transferMatchCount}件`],
+    ['組織健康度スコア', `${metrics.healthScore}`],
+  ].map(([label, value]) => `
+    <div class="summary-tile">
+      <strong>${value}</strong>
+      <span>${label}</span>
+    </div>
+  `).join('');
+}
+
+function renderAreaCards() {
+  areaCards.innerHTML = cityData.areas.map((area) => {
+    const shortage = headcountShortage(area);
+    const overrun = manMonthOverrun(area);
+    return `
+      <button class="area-card risk-${area.riskLevel}" data-area-card="${area.id}">
+        <span class="area-card-head"><strong>${area.icon} ${area.areaName}</strong><em>${area.statusLabel}</em></span>
+        <span class="area-card-grid">
+          <span>メンバー<b>${area.memberCount}名</b></span>
+          <span>必要人数<b>${area.requiredHeadcount}名</b></span>
+          <span>不足<b>${shortage}名</b></span>
+          <span>残業<b>${area.monthlyOvertimeHours}h</b></span>
+          <span>予定人工<b>${area.plannedManMonths}</b></span>
+          <span>実績人工<b>${area.actualManMonths}</b></span>
+          <span>逼迫率<b>${area.workloadRate}%</b></span>
+          <span>成果<b>${area.outputScore}</b></span>
+          <span>協業<b>${area.collaborationScore}</b></span>
+        </span>
+        <span class="area-card-action">${overrun > 0 ? `工数超過 +${overrun.toFixed(1)}人月 / ` : ''}${area.recommendedAction}</span>
+      </button>
+    `;
+  }).join('');
+
+  areaCards.querySelectorAll('button').forEach((button) => {
+    button.addEventListener('click', () => selectArea(button.dataset.areaCard));
+  });
+}
 
 function createMap() {
   cityMap.style.width = `${mapSize.width}px`;
@@ -79,6 +212,7 @@ function createMap() {
   `;
 
   renderDistricts();
+  renderAreaSignals();
   renderCollaborationRoads();
   renderTwins();
   renderVacancies();
@@ -86,25 +220,61 @@ function createMap() {
 
 function renderDistricts() {
   cityData.areas.forEach((area) => {
-    const residents = cityData.twins.filter((twin) => twin.area === area.id).length;
-    const vacancies = cityData.vacancies.filter((vacancy) => vacancy.area === area.id).length;
+    const shortage = headcountShortage(area);
+    const overrun = manMonthOverrun(area);
+    const mood = areaMood(area);
     const districtEl = document.createElement('button');
-    districtEl.className = `district ${area.theme}`;
+    districtEl.className = `district ${area.theme} risk-${area.riskLevel} ${mood}`;
     districtEl.style.left = `${area.x}px`;
     districtEl.style.top = `${area.y}px`;
     districtEl.style.width = `${area.width}px`;
     districtEl.style.height = `${area.height}px`;
     districtEl.dataset.area = area.id;
     districtEl.innerHTML = `
-      <span class="district-name"><b>${area.icon}</b>${area.name}</span>
+      <span class="district-name"><b>${area.icon}</b>${area.areaName}</span>
+      <span class="district-badges">
+        <span class="risk-badge risk-${area.riskLevel}">${area.statusLabel}</span>
+        <span class="workload-badge">逼迫率 ${area.workloadRate}%</span>
+        ${overrun > 0 ? `<span class="overrun-badge">工数超過 +${overrun.toFixed(1)}人月</span>` : ''}
+      </span>
       <span class="district-status">${area.status}</span>
-      <span class="district-meta">住人 ${residents} / 空き部屋 ${vacancies}</span>
+      <span class="district-meta">住人 ${area.memberCount} / 必要 ${area.requiredHeadcount} / 不足 ${shortage} / 空き部屋 ${area.vacancyCount}</span>
     `;
     districtEl.addEventListener('click', (event) => {
       event.stopPropagation();
       selectArea(area.id);
     });
     cityMap.appendChild(districtEl);
+  });
+}
+
+function renderAreaSignals() {
+  cityData.areas.forEach((area) => {
+    const signalEl = document.createElement('div');
+    signalEl.className = `area-signal ${areaMood(area)}`;
+    signalEl.style.left = `${area.x + area.width - 154}px`;
+    signalEl.style.top = `${area.y + 84}px`;
+    signalEl.innerHTML = `
+      <span>${area.monthlyOvertimeHours >= 160 ? '🌙 深夜灯' : '🌿 余白'}</span>
+      <span>${area.vacancyCount > 0 ? `🏠 募集 ${area.vacancyCount}` : '🏡 満室'}</span>
+      <span>${area.outputScore >= 82 ? '✨ 活性' : '☕ 穏やか'}</span>
+    `;
+    cityMap.appendChild(signalEl);
+
+    Array.from({ length: Math.min(area.vacancyCount, 3) }).forEach((_, index) => {
+      const emptyEl = document.createElement('button');
+      emptyEl.className = 'empty-room-marker';
+      emptyEl.type = 'button';
+      emptyEl.style.left = `${area.x + area.width - 82 - (index * 58)}px`;
+      emptyEl.style.top = `${area.y + area.height - 74}px`;
+      emptyEl.dataset.area = area.id;
+      emptyEl.innerHTML = '<span>入居者募集</span>';
+      emptyEl.addEventListener('click', (event) => {
+        event.stopPropagation();
+        selectArea(area.id);
+      });
+      cityMap.appendChild(emptyEl);
+    });
   });
 }
 
@@ -127,6 +297,11 @@ function renderCollaborationRoads() {
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', `M ${from.x} ${from.y} Q ${midX} ${midY - curve} ${to.x} ${to.y}`);
       path.setAttribute('class', crossArea ? 'road cross-area' : 'road');
+      const collaborationStrength = Math.max(areaById[from.area].collaborationScore, areaById[to.area].collaborationScore);
+      path.style.strokeWidth = `${Math.round(6 + collaborationStrength / 7)}px`;
+      if (areaById[from.area].workloadRate > 120 || areaById[to.area].workloadRate > 120) {
+        path.classList.add('congested');
+      }
       svg.appendChild(path);
     });
   });
@@ -236,18 +411,32 @@ function renderAreaDetail() {
   const residents = cityData.twins.filter((twin) => twin.area === area.id);
   const vacancies = cityData.vacancies.filter((vacancy) => vacancy.area === area.id);
   const crossRoads = residents.reduce((count, twin) => count + twin.collaborationIds.filter((id) => twinById[id] && twinById[id].area !== area.id).length, 0);
+  const shortage = headcountShortage(area);
+  const overrun = manMonthOverrun(area);
 
   detailTitle.textContent = '部署エリア';
   document.querySelector(`[data-area="${area.id}"]`)?.classList.add('is-selected');
   detailPanel.innerHTML = `
-    <div class="twin-topline"><span>${area.icon} ${area.name}</span><span>部署エリア</span></div>
-    <h3>${area.name}の街並み</h3>
+    <div class="twin-topline"><span>${area.icon} ${area.areaName}</span><span>${area.statusLabel}</span><span>リスク ${riskLabels[area.riskLevel]}</span></div>
+    <h3>${area.areaName}の街並み</h3>
     <p class="detail-lead">${area.status}</p>
-    <div class="metric-grid">
-      <div><strong>${residents.length}</strong><span>Work Twinの家</span></div>
-      <div><strong>${vacancies.length}</strong><span>空き部屋</span></div>
+    <div class="metric-grid area-detail-grid">
+      <div><strong>${area.memberCount}</strong><span>メンバー数</span></div>
+      <div><strong>${area.requiredHeadcount}</strong><span>必要人数</span></div>
+      <div><strong>${shortage}</strong><span>不足人数</span></div>
+      <div><strong>${area.monthlyOvertimeHours}h</strong><span>月間残業</span></div>
+      <div><strong>${area.plannedManMonths}</strong><span>予定人工</span></div>
+      <div><strong>${area.actualManMonths}</strong><span>実績人工</span></div>
+      <div><strong>${area.workloadRate}%</strong><span>工数逼迫率</span></div>
+      <div><strong>${area.outputScore}</strong><span>成果スコア</span></div>
+      <div><strong>${area.collaborationScore}</strong><span>協業スコア</span></div>
+      <div><strong>${area.vacancyCount}</strong><span>空き部屋数</span></div>
       <div><strong>${crossRoads}</strong><span>部署横断の道</span></div>
+      <div><strong>${overrun > 0 ? `+${overrun.toFixed(1)}` : 'なし'}</strong><span>工数超過</span></div>
     </div>
+    ${listBlock('主な課題', area.mainIssues)}
+    <div class="evidence-box"><strong>AIによる推奨アクション</strong><p>${area.recommendedAction}</p></div>
+    ${listBlock('引っ越し候補となる社員', area.transferCandidates)}
     ${listBlock('住人のWork Twin', residents.map((twin) => `${twin.name} / ${twin.role} / ${houseTypeLabel(twin.houseType)}`))}
     ${listBlock('入居者募集', vacancies.map((vacancy) => `${vacancy.label}: ${vacancy.neededRole}（緊急度 ${vacancy.urgency}）`))}
   `;
@@ -383,4 +572,6 @@ detailPanel.addEventListener('click', (event) => {
 });
 
 createMap();
+renderCompanySummary();
+renderAreaCards();
 render();
