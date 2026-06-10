@@ -62,13 +62,28 @@
           <div id="companySummary" class="company-summary" aria-label="会社全体サマリー"></div>
 
           <div class="map-help">
-            横にも縦にも広い街です。部署エリア・家・空き部屋をクリックして探索できます。部署の健康状態は、明かり・空き部屋・道の太さ・にぎわいでやさしく表現しています。
+            普段は美しい街並みだけを眺め、ホバー・クリック・モード切替で協業の道や引っ越し候補がそっと浮かび上がります。
           </div>
 
           <div id="areaCards" class="area-cards" aria-label="部署状態カード" hidden></div>
 
           <div class="city-scroll" aria-label="Work Twin City scroll area">
             <div class="city-map" id="cityMap" aria-label="Work Twin City map"></div>
+            <div class="map-legend" aria-label="関係線の凡例">
+              <strong>協業の道</strong>
+              <span><i class="line-sample solid"></i>継続的な協業</span>
+              <span><i class="line-sample dotted"></i>一時的な支援</span>
+              <span><i class="line-sample dashed"></i>引っ越し候補</span>
+              <span><i class="line-sample main"></i>部署間の主要連携</span>
+            </div>
+            <div class="layer-switcher" id="layerControls" aria-label="表示レイヤー切替">
+              <strong>表示レイヤー</strong>
+              <label><input type="checkbox" data-layer="collaboration" checked /> 協業線</label>
+              <label><input type="checkbox" data-layer="transfer" checked /> 異動候補線</label>
+              <label><input type="checkbox" data-layer="status" checked /> 部署状態</label>
+              <label><input type="checkbox" data-layer="vacancy" checked /> 空き部屋</label>
+              <label><input type="checkbox" data-layer="voice" /> 住民の声</label>
+            </div>
           </div>
         </section>
 
