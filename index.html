@@ -62,13 +62,25 @@
           <div id="companySummary" class="company-summary" aria-label="会社全体サマリー"></div>
 
           <div class="map-help">
-            普段は美しい街並みだけを眺め、ホバー・クリック・モード切替で協業の道や引っ越し候補がそっと浮かび上がります。
+            ＋/−・全体表示・100%で街マップだけをズームできます。Ctrl/⌘ + ホイールでも倍率を変えられ、空白部分をドラッグして移動できます。
           </div>
 
           <div id="areaCards" class="area-cards" aria-label="部署状態カード" hidden></div>
 
-          <div class="city-scroll" aria-label="Work Twin City scroll area">
-            <div class="city-map" id="cityMap" aria-label="Work Twin City map"></div>
+          <div class="city-scroll" id="mapViewport" aria-label="Work Twin City scroll area">
+            <div class="map-canvas" id="mapCanvas">
+              <div class="city-map" id="cityMap" aria-label="Work Twin City map"></div>
+            </div>
+            <div class="zoom-control" id="zoomControls" aria-label="地図ズーム操作">
+              <div class="zoom-mode-label" id="zoomModeLabel">標準モード</div>
+              <div class="zoom-button-row">
+                <button type="button" data-zoom-action="out" aria-label="ズームアウト">−</button>
+                <button type="button" data-zoom-action="in" aria-label="ズームイン">＋</button>
+              </div>
+              <button type="button" data-zoom-action="fit">全体表示</button>
+              <button type="button" data-zoom-action="reset">100%</button>
+              <span id="zoomPercent">現在倍率：100%</span>
+            </div>
             <div class="map-legend" aria-label="関係線の凡例">
               <strong>協業の道</strong>
               <span><i class="line-sample solid"></i>継続的な協業</span>

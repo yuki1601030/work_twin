@@ -111,6 +111,11 @@ const cityData = {
 
 const mapSize = { width: 1900, height: 1540 };
 const cityMap = document.getElementById('cityMap');
+const mapViewport = document.getElementById('mapViewport');
+const mapCanvas = document.getElementById('mapCanvas');
+const zoomControls = document.getElementById('zoomControls');
+const zoomPercent = document.getElementById('zoomPercent');
+const zoomModeLabel = document.getElementById('zoomModeLabel');
 const detailTitle = document.getElementById('detailTitle');
 const detailPanel = document.getElementById('detailPanel');
 const moveCandidates = document.getElementById('moveCandidates');
@@ -132,10 +137,80 @@ let hoveredTwinId = null;
 let hoveredAreaId = null;
 let hoveredVacancyId = null;
 const layerState = { collaboration: true, transfer: true, status: true, vacancy: true, voice: false };
+const zoomLevels = [0.5, 0.75, 1, 1.25, 1.5];
+const minZoom = 0.4;
+const maxZoom = 1.6;
+const fitZoom = 0.5;
+let zoom = 1;
+let isDraggingMap = false;
+let suppressNextMapClick = false;
+let dragStart = { x: 0, y: 0, scrollLeft: 0, scrollTop: 0 };
 
 const areaById = Object.fromEntries(cityData.areas.map((area) => [area.id, area]));
 const twinById = Object.fromEntries(cityData.twins.map((twin) => [twin.id, twin]));
 const riskLabels = { high: '高', medium: '中', low: '低' };
+
+
+function clampZoom(value) {
+  return Math.min(maxZoom, Math.max(minZoom, Number(value.toFixed(2))));
+}
+
+function zoomMode(value = zoom) {
+  if (value <= 0.6) return { key: 'overview', label: '俯瞰モード' };
+  if (value >= 1.2) return { key: 'detail', label: '詳細モード' };
+  return { key: 'standard', label: '標準モード' };
+}
+
+function applyZoom(nextZoom, options = {}) {
+  const previousZoom = zoom;
+  zoom = clampZoom(nextZoom);
+  const mode = zoomMode();
+
+  mapCanvas.style.width = `${Math.ceil(mapSize.width * zoom)}px`;
+  mapCanvas.style.height = `${Math.ceil(mapSize.height * zoom)}px`;
+  cityMap.style.transform = `scale(${zoom})`;
+  cityMap.classList.toggle('zoom-overview', mode.key === 'overview');
+  cityMap.classList.toggle('zoom-standard', mode.key === 'standard');
+  cityMap.classList.toggle('zoom-detail', mode.key === 'detail');
+
+  zoomPercent.textContent = `現在倍率：${Math.round(zoom * 100)}%`;
+  zoomModeLabel.textContent = mode.label;
+  zoomControls?.querySelectorAll('[data-zoom-action]').forEach((button) => {
+    button.classList.toggle('is-active', (button.dataset.zoomAction === 'fit' && mode.key === 'overview') || (button.dataset.zoomAction === 'reset' && zoom === 1));
+  });
+
+  if (options.center && mapViewport) {
+    const ratio = zoom / previousZoom;
+    mapViewport.scrollLeft = ((mapViewport.scrollLeft + mapViewport.clientWidth / 2) * ratio) - mapViewport.clientWidth / 2;
+    mapViewport.scrollTop = ((mapViewport.scrollTop + mapViewport.clientHeight / 2) * ratio) - mapViewport.clientHeight / 2;
+  }
+}
+
+function stepZoom(direction) {
+  if (direction > 0) {
+    const next = zoomLevels.find((level) => level > zoom + 0.01) ?? maxZoom;
+    applyZoom(next, { center: true });
+    return;
+  }
+  const reversed = [...zoomLevels].reverse();
+  const next = reversed.find((level) => level < zoom - 0.01) ?? minZoom;
+  applyZoom(next, { center: true });
+}
+
+function centerMapAfterInitialZoom() {
+  requestAnimationFrame(() => {
+    mapViewport.scrollLeft = Math.max(0, (mapCanvas.offsetWidth - mapViewport.clientWidth) / 2);
+    mapViewport.scrollTop = Math.max(0, (mapCanvas.offsetHeight - mapViewport.clientHeight) / 2);
+  });
+}
+
+function houseTypeLabel(type) {
+  return ({
+    'planning-studio': '企画スタジオ', 'lab-home': 'ラボ型の家', 'growth-house': '育成ハウス',
+    'rocket-garage': '実験ガレージ', 'data-tower': 'データタワー', 'market-shop': 'マーケット店',
+    'support-cafe': '伴走カフェ', 'factory-home': '現場工房'
+  })[type] || 'Work Twinの家';
+}
 
 const relationTypeLabels = {
   strong: '強い協業',
@@ -307,6 +382,7 @@ function renderAreaCards() {
 function createMap() {
   cityMap.style.width = `${mapSize.width}px`;
   cityMap.style.height = `${mapSize.height}px`;
+  applyZoom(zoom);
   cityMap.innerHTML = `
     <div class="central-plaza">
       <strong>Company Plaza</strong>
@@ -550,9 +626,10 @@ function renderTwins() {
       <span class="roof"></span>
       <span class="home-body">
         <span class="home-icon">${houseIcon(twin.houseType)}</span>
-        <strong>${initials(twin.name)}</strong>
+        <strong><span class="name-short">${initials(twin.name)}</span><span class="name-full">${twin.name}</span></strong>
         <small>${twin.role}</small>
-        <em>${area.name}</em>
+        <em>${houseTypeLabel(twin.houseType)}</em>
+        <span class="home-area-label">${area.name}</span>
       </span>
       <span class="voice-bubble">${twin.peerVoices?.[0] || '協業の声があります'}</span>
     `;
@@ -956,7 +1033,61 @@ layerControls.addEventListener('change', (event) => {
   render();
 });
 
-cityMap.addEventListener('click', () => selectArea('planning'));
+
+zoomControls.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-zoom-action]');
+  if (!button) return;
+  const action = button.dataset.zoomAction;
+  if (action === 'in') stepZoom(1);
+  if (action === 'out') stepZoom(-1);
+  if (action === 'fit') applyZoom(fitZoom, { center: true });
+  if (action === 'reset') applyZoom(1, { center: true });
+});
+
+mapViewport.addEventListener('wheel', (event) => {
+  if (!event.ctrlKey && !event.metaKey) return;
+  event.preventDefault();
+  const delta = event.deltaY > 0 ? -0.1 : 0.1;
+  applyZoom(zoom + delta, { center: true });
+}, { passive: false });
+
+mapViewport.addEventListener('pointerdown', (event) => {
+  if (event.button !== 0 || event.target.closest('button, .zoom-control, .layer-switcher, .map-legend')) return;
+  isDraggingMap = true;
+  dragStart = { x: event.clientX, y: event.clientY, scrollLeft: mapViewport.scrollLeft, scrollTop: mapViewport.scrollTop };
+  mapViewport.classList.add('is-dragging');
+  mapViewport.setPointerCapture?.(event.pointerId);
+});
+
+mapViewport.addEventListener('pointermove', (event) => {
+  if (!isDraggingMap) return;
+  event.preventDefault();
+  const deltaX = event.clientX - dragStart.x;
+  const deltaY = event.clientY - dragStart.y;
+  if (Math.abs(deltaX) + Math.abs(deltaY) > 6) suppressNextMapClick = true;
+  mapViewport.scrollLeft = dragStart.scrollLeft - deltaX;
+  mapViewport.scrollTop = dragStart.scrollTop - deltaY;
+});
+
+function stopMapDrag(event) {
+  if (!isDraggingMap) return;
+  isDraggingMap = false;
+  mapViewport.classList.remove('is-dragging');
+  mapViewport.releasePointerCapture?.(event.pointerId);
+}
+
+mapViewport.addEventListener('pointerup', stopMapDrag);
+mapViewport.addEventListener('pointercancel', stopMapDrag);
+mapViewport.addEventListener('pointerleave', stopMapDrag);
+
+cityMap.addEventListener('click', (event) => {
+  if (suppressNextMapClick) {
+    suppressNextMapClick = false;
+    event.preventDefault();
+    return;
+  }
+  selectArea('planning');
+});
 detailPanel.addEventListener('click', (event) => {
   const target = event.target.closest('[data-vacancy]');
   if (target) selectVacancy(target.dataset.vacancy);
@@ -967,6 +1098,7 @@ detailPanel.addEventListener('click', (event) => {
 });
 
 createMap();
+centerMapAfterInitialZoom();
 renderCompanySummary();
 renderAreaCards();
 render();
