@@ -2,11 +2,11 @@ const cityData = {
   areas: [
     {
       id: 'dev', areaName: '開発区', name: '開発区', icon: '🧪', theme: 'blue', x: 80, y: 90, width: 520, height: 390,
-      memberCount: 8, requiredHeadcount: 10, monthlyOvertimeHours: 320, plannedManMonths: 9.6, actualManMonths: 12.8, workloadRate: 133, outputScore: 86, collaborationScore: 92, vacancyCount: 2, riskLevel: 'high', statusLabel: '過負荷・要支援',
+      memberCount: 8, requiredHeadcount: 10, monthlyOvertimeHours: 320, plannedManMonths: 8.0, actualManMonths: 10.6, workloadRate: 132, outputScore: 86, collaborationScore: 92, vacancyCount: 2, riskLevel: 'high', statusLabel: '過負荷 / 要支援',
       status: 'プロダクトの基盤と体験をつくるラボ群。夜遅くまでレビュー灯がともり、協業の道が太く混み合う。',
       mainIssues: ['レビュー待ちが集中し、夕方以降もラボの明かりが残りやすい', 'フロントエンドと基盤改善の兼務が増え、工数が計画を超過'],
-      recommendedAction: 'レビュー負荷が高いため、フロントエンド経験者と基盤改善を担える人材を追加する。',
-      transferCandidates: ['水野あおい（PdM観点でレビュー論点整理）', '日比野あかり（品質改善支援）']
+      recommendedAction: 'フロントエンド経験者1名、PdM補佐1名を引っ越し候補として提示し、レビュー交通整理を支援する。',
+      transferCandidates: ['森野かい（フロントエンド経験者）', '水野あおい（PdM補佐）']
     },
     {
       id: 'planning', areaName: '事業企画区', name: '事業企画区', icon: '🧭', theme: 'green', x: 680, y: 80, width: 500, height: 360,
@@ -18,19 +18,19 @@ const cityData = {
     },
     {
       id: 'hr', areaName: '人事区', name: '人事区', icon: '🌱', theme: 'mint', x: 1260, y: 90, width: 470, height: 380,
-      memberCount: 5, requiredHeadcount: 5, monthlyOvertimeHours: 80, plannedManMonths: 5.2, actualManMonths: 5.0, workloadRate: 96, outputScore: 74, collaborationScore: 76, vacancyCount: 0, riskLevel: 'low', statusLabel: '安定',
+      memberCount: 5, requiredHeadcount: 5, monthlyOvertimeHours: 80, plannedManMonths: 5.0, actualManMonths: 4.7, workloadRate: 94, outputScore: 74, collaborationScore: 76, vacancyCount: 0, riskLevel: 'low', statusLabel: '安定 / 他部署支援可能',
       status: '育成・評価・組織開発を支える緑の多いコミュニティ広場。落ち着いた余白がある。',
-      mainIssues: ['制度運用は安定しているが、他部署支援の見える化が次のテーマ', '繁忙期に備えた相談窓口の分散が必要'],
-      recommendedAction: '安定しているため、他部署支援候補を検討しつつ繁忙期の備えを整える。',
+      mainIssues: ['評価制度刷新の知見を他部署に展開可能', '繁忙期に備えた相談窓口の分散が必要'],
+      recommendedAction: '新規事業区の評価設計支援に一部兼務を提案し、街全体へ育成知見を分ける。',
       transferCandidates: ['桜井ゆい（育成設計）', '小馬はる（オンボーディング支援）']
     },
     {
       id: 'newbiz', areaName: '新規事業区', name: '新規事業区', icon: '🚀', theme: 'sky', x: 120, y: 570, width: 510, height: 400,
-      memberCount: 4, requiredHeadcount: 7, monthlyOvertimeHours: 210, plannedManMonths: 5.8, actualManMonths: 7.4, workloadRate: 128, outputScore: 82, collaborationScore: 84, vacancyCount: 3, riskLevel: 'high', statusLabel: '人材不足',
+      memberCount: 4, requiredHeadcount: 7, monthlyOvertimeHours: 210, plannedManMonths: 4.0, actualManMonths: 5.8, workloadRate: 145, outputScore: 82, collaborationScore: 84, vacancyCount: 3, riskLevel: 'high', statusLabel: '急成長 / 人手不足',
       status: 'PoCガレージや検証ロフトが並ぶ実験都市。活気は強いが、空き部屋と入居者募集が目立つ。',
-      mainIssues: ['PoCの同時進行で意思決定資料と顧客検証が不足', 'PdM / BA人材が足りず、夜のガレージ灯が増えている'],
-      recommendedAction: 'PdM / BA人材を2名募集し、検証テーマを支援できる兼務者も募る。',
-      transferCandidates: ['水野あおい（PdM）', '藤見そら（BA）', '森野かい（UI実装）']
+      mainIssues: ['仮説検証と業務設計の人材不足', 'PdM / BA人材が足りず、夜のガレージ灯が増えている'],
+      recommendedAction: 'BA人材、PdM見習い、データ分析人材を引っ越し候補として提示する。',
+      transferCandidates: ['藤見そら（BA人材）', '水野あおい（PdM見習い）', '青葉ひなた（データ分析人材）']
     },
     {
       id: 'data', areaName: 'データ分析区', name: 'データ分析区', icon: '📊', theme: 'violet', x: 730, y: 560, width: 470, height: 380,
@@ -156,15 +156,14 @@ function companyMetrics() {
 
 function renderCompanySummary() {
   const metrics = companyMetrics();
-  companySummary.innerHTML = [
-    ['総社員数', `${metrics.totalMembers}名`],
-    ['空き部屋数', `${metrics.totalVacancies}室`],
-    ['過負荷エリア数', `${metrics.overloadedAreas}区`],
-    ['月間残業時間合計', `${metrics.overtimeTotal}h`],
-    ['人材不足人数', `${metrics.shortageTotal}名`],
-    ['異動候補マッチ数', `${metrics.transferMatchCount}件`],
-    ['組織健康度スコア', `${metrics.healthScore}`],
-  ].map(([label, value]) => `
+  const moodTiles = [
+    ['街の見守り', metrics.healthScore >= 78 ? 'おおむね穏やか' : '支援の灯りを確認中'],
+    ['夜灯り', metrics.overtimeTotal >= 1000 ? '少し多め' : '落ち着き気味'],
+    ['空き部屋', metrics.shortageTotal > 0 ? '入居者募集あり' : '満室に近い'],
+    ['協業の道', metrics.transferMatchCount > 10 ? 'よく流れている' : '穏やかに接続'],
+  ];
+
+  companySummary.innerHTML = moodTiles.map(([label, value]) => `
     <div class="summary-tile">
       <strong>${value}</strong>
       <span>${label}</span>
@@ -172,33 +171,11 @@ function renderCompanySummary() {
   `).join('');
 }
 
-function renderAreaCards() {
-  areaCards.innerHTML = cityData.areas.map((area) => {
-    const shortage = headcountShortage(area);
-    const overrun = manMonthOverrun(area);
-    return `
-      <button class="area-card risk-${area.riskLevel}" data-area-card="${area.id}">
-        <span class="area-card-head"><strong>${area.icon} ${area.areaName}</strong><em>${area.statusLabel}</em></span>
-        <span class="area-card-grid">
-          <span>メンバー<b>${area.memberCount}名</b></span>
-          <span>必要人数<b>${area.requiredHeadcount}名</b></span>
-          <span>不足<b>${shortage}名</b></span>
-          <span>残業<b>${area.monthlyOvertimeHours}h</b></span>
-          <span>予定人工<b>${area.plannedManMonths}</b></span>
-          <span>実績人工<b>${area.actualManMonths}</b></span>
-          <span>逼迫率<b>${area.workloadRate}%</b></span>
-          <span>成果<b>${area.outputScore}</b></span>
-          <span>協業<b>${area.collaborationScore}</b></span>
-        </span>
-        <span class="area-card-action">${overrun > 0 ? `工数超過 +${overrun.toFixed(1)}人月 / ` : ''}${area.recommendedAction}</span>
-      </button>
-    `;
-  }).join('');
 
-  areaCards.querySelectorAll('button').forEach((button) => {
-    button.addEventListener('click', () => selectArea(button.dataset.areaCard));
-  });
+function renderAreaCards() {
+  areaCards.innerHTML = '';
 }
+
 
 function createMap() {
   cityMap.style.width = `${mapSize.width}px`;
@@ -220,8 +197,6 @@ function createMap() {
 
 function renderDistricts() {
   cityData.areas.forEach((area) => {
-    const shortage = headcountShortage(area);
-    const overrun = manMonthOverrun(area);
     const mood = areaMood(area);
     const districtEl = document.createElement('button');
     districtEl.className = `district ${area.theme} risk-${area.riskLevel} ${mood}`;
@@ -230,15 +205,10 @@ function renderDistricts() {
     districtEl.style.width = `${area.width}px`;
     districtEl.style.height = `${area.height}px`;
     districtEl.dataset.area = area.id;
+    districtEl.setAttribute('aria-label', `${area.areaName}を開く`);
     districtEl.innerHTML = `
       <span class="district-name"><b>${area.icon}</b>${area.areaName}</span>
-      <span class="district-badges">
-        <span class="risk-badge risk-${area.riskLevel}">${area.statusLabel}</span>
-        <span class="workload-badge">逼迫率 ${area.workloadRate}%</span>
-        ${overrun > 0 ? `<span class="overrun-badge">工数超過 +${overrun.toFixed(1)}人月</span>` : ''}
-      </span>
-      <span class="district-status">${area.status}</span>
-      <span class="district-meta">住人 ${area.memberCount} / 必要 ${area.requiredHeadcount} / 不足 ${shortage} / 空き部屋 ${area.vacancyCount}</span>
+      <span class="district-scene-note">街のサインをクリックして詳細を見る</span>
     `;
     districtEl.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -248,35 +218,83 @@ function renderDistricts() {
   });
 }
 
+
 function renderAreaSignals() {
   cityData.areas.forEach((area) => {
-    const signalEl = document.createElement('div');
-    signalEl.className = `area-signal ${areaMood(area)}`;
-    signalEl.style.left = `${area.x + area.width - 154}px`;
-    signalEl.style.top = `${area.y + 84}px`;
-    signalEl.innerHTML = `
-      <span>${area.monthlyOvertimeHours >= 160 ? '🌙 深夜灯' : '🌿 余白'}</span>
-      <span>${area.vacancyCount > 0 ? `🏠 募集 ${area.vacancyCount}` : '🏡 満室'}</span>
-      <span>${area.outputScore >= 82 ? '✨ 活性' : '☕ 穏やか'}</span>
-    `;
-    cityMap.appendChild(signalEl);
+    const shortage = headcountShortage(area);
+    const overrun = manMonthOverrun(area);
+    const tags = areaMapTags(area, shortage, overrun);
 
-    Array.from({ length: Math.min(area.vacancyCount, 3) }).forEach((_, index) => {
-      const emptyEl = document.createElement('button');
-      emptyEl.className = 'empty-room-marker';
-      emptyEl.type = 'button';
-      emptyEl.style.left = `${area.x + area.width - 82 - (index * 58)}px`;
-      emptyEl.style.top = `${area.y + area.height - 74}px`;
-      emptyEl.dataset.area = area.id;
-      emptyEl.innerHTML = '<span>入居者募集</span>';
-      emptyEl.addEventListener('click', (event) => {
-        event.stopPropagation();
-        selectArea(area.id);
-      });
-      cityMap.appendChild(emptyEl);
+    const signEl = document.createElement('button');
+    signEl.className = `area-signpost ${areaMood(area)}`;
+    signEl.type = 'button';
+    signEl.style.left = `${area.x + 34}px`;
+    signEl.style.top = `${area.y + 62}px`;
+    signEl.dataset.area = area.id;
+    signEl.innerHTML = tags.map((tag) => `<span class="${tag.className}">${tag.label}</span>`).join('');
+    signEl.addEventListener('click', (event) => {
+      event.stopPropagation();
+      selectArea(area.id);
     });
+    cityMap.appendChild(signEl);
+
+    if (area.monthlyOvertimeHours >= 160) {
+      renderRepeatedMarker(area, 'night-light', Math.min(4, Math.ceil(area.monthlyOvertimeHours / 95)), 64, 112, '');
+    }
+
+    if (shortage > 0) {
+      Array.from({ length: Math.min(shortage, 4) }).forEach((_, index) => {
+        const emptyEl = document.createElement('button');
+        emptyEl.className = 'empty-room-marker';
+        emptyEl.type = 'button';
+        emptyEl.style.left = `${area.x + area.width - 78 - (index * 48)}px`;
+        emptyEl.style.top = `${area.y + area.height - 68 - ((index % 2) * 26)}px`;
+        emptyEl.dataset.area = area.id;
+        emptyEl.innerHTML = `<span>${index === 0 ? `空室${shortage}` : '募集'}</span>`;
+        emptyEl.addEventListener('click', (event) => {
+          event.stopPropagation();
+          selectArea(area.id);
+        });
+        cityMap.appendChild(emptyEl);
+      });
+    }
+
+    if (area.workloadRate >= 118) {
+      renderRepeatedMarker(area, 'congestion-dot', Math.min(5, Math.ceil((area.workloadRate - 100) / 9)), 118, area.height - 106, '');
+    }
+
+    if (area.riskLevel === 'low') {
+      renderRepeatedMarker(area, 'calm-grass', 3, area.width - 210, area.height - 86, '✓');
+    }
+
+    if (area.outputScore >= 82) {
+      renderRepeatedMarker(area, 'spark-star', Math.min(3, Math.ceil((area.outputScore - 78) / 5)), area.width - 128, 126, '✦');
+    }
   });
 }
+
+function areaMapTags(area, shortage, overrun) {
+  const tags = [];
+  if (area.monthlyOvertimeHours >= 160) tags.push({ label: '🌙 夜稼働', className: 'tag-night' });
+  if (shortage > 0) tags.push({ label: shortage >= 2 ? `空室${shortage}` : '入居者募集', className: 'tag-vacancy' });
+  if (area.workloadRate >= 118 || overrun > 0) tags.push({ label: area.workloadRate >= 130 ? '要支援' : '過負荷', className: 'tag-load' });
+  if (area.riskLevel === 'low') tags.push({ label: '✓ 安定', className: 'tag-calm' });
+  if (area.outputScore >= 82) tags.push({ label: '✦ 成果好調', className: 'tag-star' });
+  if (area.collaborationScore >= 84) tags.push({ label: '↔ 協業活発', className: 'tag-flow' });
+  return tags.slice(0, 3);
+}
+
+function renderRepeatedMarker(area, className, count, offsetX, offsetY, label) {
+  Array.from({ length: count }).forEach((_, index) => {
+    const marker = document.createElement('span');
+    marker.className = className;
+    marker.style.left = `${area.x + offsetX + (index * 34)}px`;
+    marker.style.top = `${area.y + offsetY + ((index % 2) * 18)}px`;
+    marker.textContent = label;
+    cityMap.appendChild(marker);
+  });
+}
+
 
 function renderCollaborationRoads() {
   const svg = cityMap.querySelector('.roads');
@@ -298,7 +316,10 @@ function renderCollaborationRoads() {
       path.setAttribute('d', `M ${from.x} ${from.y} Q ${midX} ${midY - curve} ${to.x} ${to.y}`);
       path.setAttribute('class', crossArea ? 'road cross-area' : 'road');
       const collaborationStrength = Math.max(areaById[from.area].collaborationScore, areaById[to.area].collaborationScore);
-      path.style.strokeWidth = `${Math.round(6 + collaborationStrength / 7)}px`;
+      path.style.strokeWidth = `${Math.round(5 + collaborationStrength / 9)}px`;
+      if (crossArea && collaborationStrength >= 84) {
+        path.classList.add('high-flow');
+      }
       if (areaById[from.area].workloadRate > 120 || areaById[to.area].workloadRate > 120) {
         path.classList.add('congested');
       }
