@@ -118,13 +118,61 @@ const companySummary = document.getElementById('companySummary');
 const areaCards = document.getElementById('areaCards');
 const reportPanel = document.getElementById('reportPanel');
 const generateReport = document.getElementById('generateReport');
+const periodControls = document.getElementById('periodControls');
+const modeControls = document.getElementById('modeControls');
 
 let selectedType = 'twin';
 let selectedId = cityData.twins[0].id;
+let activeTwinForMove = cityData.twins[0].id;
+let currentPeriod = 'current';
+let currentMode = 'normal';
+let outputMode = 'evaluation';
 
 const areaById = Object.fromEntries(cityData.areas.map((area) => [area.id, area]));
 const twinById = Object.fromEntries(cityData.twins.map((twin) => [twin.id, twin]));
 const riskLabels = { high: '高', medium: '中', low: '低' };
+
+const periodScenarios = {
+  previous: { label: '前期', workloadDelta: -12, overtimeFactor: 0.72, outputDelta: -2, vacancyDelta: -1, note: '前期は開発区が比較的安定し、新規事業区はまだ小さな実験街でした。' },
+  current: { label: '今期', workloadDelta: 0, overtimeFactor: 1, outputDelta: 0, vacancyDelta: 0, note: '今期は新規事業区とデータ分析区が急成長し、空き部屋と協業の道が増えています。' },
+  next: { label: '来期予測', workloadDelta: -7, overtimeFactor: 0.86, outputDelta: 3, vacancyDelta: -1, note: '来期予測では、開発区から新規事業区への引っ越しが成立すると過負荷が少し改善します。' },
+};
+
+const peerVoicePool = [
+  '資料レビューで論点が整理されました。',
+  '部署間の調整を助けてもらいました。',
+  '顧客課題の翻訳がとてもわかりやすかったです。',
+  '新規事業区との橋渡し役になってくれました。',
+  '迷っていた優先順位を一緒にほどいてくれました。',
+  '現場の声をやさしくプロダクト改善に接続してくれました。',
+];
+
+cityData.twins.forEach((twin, index) => {
+  twin.peerVoices = twin.peerVoices || [peerVoicePool[index % peerVoicePool.length], peerVoicePool[(index + 2) % peerVoicePool.length]];
+  twin.visibilitySettings = twin.visibilitySettings || { personal: true, manager: true, hr: false, profile: false, evaluation: true };
+});
+
+function displayArea(area) {
+  const scenario = periodScenarios[currentPeriod];
+  const workloadAdjustment = currentPeriod === 'previous' && area.id === 'newbiz' ? -22 : currentPeriod === 'next' && area.id === 'newbiz' ? -16 : scenario.workloadDelta;
+  const memberBonus = currentPeriod === 'next' && ['newbiz', 'data'].includes(area.id) ? 1 : 0;
+  const adjusted = {
+    ...area,
+    memberCount: area.memberCount + memberBonus,
+    monthlyOvertimeHours: Math.max(30, Math.round(area.monthlyOvertimeHours * scenario.overtimeFactor)),
+    workloadRate: Math.max(72, area.workloadRate + workloadAdjustment),
+    actualManMonths: Math.max(1, +(area.actualManMonths * (scenario.overtimeFactor + 0.04)).toFixed(1)),
+    outputScore: Math.min(98, area.outputScore + scenario.outputDelta),
+    vacancyCount: Math.max(0, area.vacancyCount + scenario.vacancyDelta - memberBonus),
+  };
+  adjusted.riskLevel = adjusted.workloadRate >= 125 || headcountShortage(adjusted) >= 2 ? 'high' : adjusted.workloadRate >= 105 || headcountShortage(adjusted) >= 1 ? 'medium' : 'low';
+  adjusted.statusLabel = currentPeriod === 'previous' ? `前期: ${area.statusLabel}` : currentPeriod === 'next' ? `来期予測: ${area.statusLabel}` : area.statusLabel;
+  return adjusted;
+}
+
+function displayAreas() {
+  return cityData.areas.map(displayArea);
+}
 
 function headcountShortage(area) {
   return Math.max(area.requiredHeadcount - area.memberCount, 0);
@@ -141,14 +189,15 @@ function areaMood(area) {
 }
 
 function companyMetrics() {
-  const totalMembers = cityData.areas.reduce((sum, area) => sum + area.memberCount, 0);
-  const totalVacancies = cityData.areas.reduce((sum, area) => sum + area.vacancyCount, 0);
-  const overloadedAreas = cityData.areas.filter((area) => area.riskLevel === 'high' || area.workloadRate >= 120).length;
-  const overtimeTotal = cityData.areas.reduce((sum, area) => sum + area.monthlyOvertimeHours, 0);
-  const shortageTotal = cityData.areas.reduce((sum, area) => sum + headcountShortage(area), 0);
+  const areas = displayAreas();
+  const totalMembers = areas.reduce((sum, area) => sum + area.memberCount, 0);
+  const totalVacancies = areas.reduce((sum, area) => sum + area.vacancyCount, 0);
+  const overloadedAreas = areas.filter((area) => area.riskLevel === 'high' || area.workloadRate >= 120).length;
+  const overtimeTotal = areas.reduce((sum, area) => sum + area.monthlyOvertimeHours, 0);
+  const shortageTotal = areas.reduce((sum, area) => sum + headcountShortage(area), 0);
   const transferMatchCount = cityData.vacancies.reduce((sum, vacancy) => sum + vacancy.recommendedResidents.length, 0);
-  const averageWorkload = cityData.areas.reduce((sum, area) => sum + area.workloadRate, 0) / cityData.areas.length;
-  const averageOutput = cityData.areas.reduce((sum, area) => sum + area.outputScore, 0) / cityData.areas.length;
+  const averageWorkload = areas.reduce((sum, area) => sum + area.workloadRate, 0) / areas.length;
+  const averageOutput = areas.reduce((sum, area) => sum + area.outputScore, 0) / areas.length;
   const healthScore = Math.max(0, Math.round(100 - (averageWorkload - 100) * 0.65 - overloadedAreas * 4 - shortageTotal * 1.8 + (averageOutput - 75) * 0.35));
 
   return { totalMembers, totalVacancies, overloadedAreas, overtimeTotal, shortageTotal, transferMatchCount, healthScore };
@@ -187,6 +236,7 @@ function createMap() {
     </div>
     <svg class="roads" viewBox="0 0 ${mapSize.width} ${mapSize.height}" aria-hidden="true"></svg>
   `;
+  cityMap.classList.toggle('planning-mode', currentMode === 'planning');
 
   renderDistricts();
   renderAreaSignals();
@@ -196,7 +246,7 @@ function createMap() {
 }
 
 function renderDistricts() {
-  cityData.areas.forEach((area) => {
+  displayAreas().forEach((area) => {
     const mood = areaMood(area);
     const districtEl = document.createElement('button');
     districtEl.className = `district ${area.theme} risk-${area.riskLevel} ${mood}`;
@@ -220,7 +270,7 @@ function renderDistricts() {
 
 
 function renderAreaSignals() {
-  cityData.areas.forEach((area) => {
+  displayAreas().forEach((area) => {
     const shortage = headcountShortage(area);
     const overrun = manMonthOverrun(area);
     const tags = areaMapTags(area, shortage, overrun);
@@ -299,6 +349,7 @@ function renderRepeatedMarker(area, className, count, offsetX, offsetY, label) {
 function renderCollaborationRoads() {
   const svg = cityMap.querySelector('.roads');
   const renderedPairs = new Set();
+  const displayAreaById = Object.fromEntries(displayAreas().map((area) => [area.id, area]));
 
   cityData.twins.forEach((from) => {
     from.collaborationIds.forEach((toId) => {
@@ -315,12 +366,12 @@ function renderCollaborationRoads() {
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', `M ${from.x} ${from.y} Q ${midX} ${midY - curve} ${to.x} ${to.y}`);
       path.setAttribute('class', crossArea ? 'road cross-area' : 'road');
-      const collaborationStrength = Math.max(areaById[from.area].collaborationScore, areaById[to.area].collaborationScore);
+      const collaborationStrength = Math.max(displayAreaById[from.area].collaborationScore, displayAreaById[to.area].collaborationScore);
       path.style.strokeWidth = `${Math.round(5 + collaborationStrength / 9)}px`;
       if (crossArea && collaborationStrength >= 84) {
         path.classList.add('high-flow');
       }
-      if (areaById[from.area].workloadRate > 120 || areaById[to.area].workloadRate > 120) {
+      if (displayAreaById[from.area].workloadRate > 120 || displayAreaById[to.area].workloadRate > 120) {
         path.classList.add('congested');
       }
       svg.appendChild(path);
@@ -377,6 +428,8 @@ function renderVacancies() {
 function selectTwin(id) {
   selectedType = 'twin';
   selectedId = id;
+  activeTwinForMove = id;
+  outputMode = 'evaluation';
   resetReport();
   render();
 }
@@ -401,6 +454,7 @@ function render() {
   if (selectedType === 'twin') renderTwinDetail();
   if (selectedType === 'area') renderAreaDetail();
   if (selectedType === 'vacancy') renderVacancyDetail();
+  if (selectedType === 'planning') renderPlanningDetail();
 
   renderMoveCandidates();
 }
@@ -423,12 +477,16 @@ function renderTwinDetail() {
     ${listBlock('関わった人', collaborators.map((person) => `${person.name} / ${areaById[person.area].name} / ${person.role}`))}
     <div class="evidence-box"><strong>次期の成長テーマ</strong><p>${twin.growthTheme}</p></div>
     <div class="comment-draft"><strong>評価コメント案</strong><p>${twin.evaluationSummary}</p></div>
+    ${workTwinRooms(twin, collaborators)}
+    ${peerVoicesBlock(twin)}
+    ${visibilityBlock(twin)}
+    ${outputSwitchBlock(twin, matches)}
     ${relocationBlock(matches)}
   `;
 }
 
 function renderAreaDetail() {
-  const area = areaById[selectedId];
+  const area = displayArea(areaById[selectedId]);
   const residents = cityData.twins.filter((twin) => twin.area === area.id);
   const vacancies = cityData.vacancies.filter((vacancy) => vacancy.area === area.id);
   const crossRoads = residents.reduce((count, twin) => count + twin.collaborationIds.filter((id) => twinById[id] && twinById[id].area !== area.id).length, 0);
@@ -477,6 +535,7 @@ function renderVacancyDetail() {
     ${pillBlock('求めるスキル', vacancy.requiredSkills)}
     ${listBlock('推薦される社員', recommended.map((twin) => `${twin.name} / ${areaById[twin.area].name} / ${twin.role}`))}
     <button class="secondary-button" type="button">この部屋に引っ越し候補を探す</button>
+    ${activeTwinForMove ? relocationSimulationBlock(twinById[activeTwinForMove], vacancy) : ''}
     <div class="evidence-box"><strong>表現の意図</strong><p>人材不足や社内公募を、命令ではなく「次に住みたい部屋を探す」体験として見せています。</p></div>
   `;
 }
@@ -522,6 +581,61 @@ function relocationBlock(matches) {
       </div>
     </div>
   `;
+}
+
+
+function workTwinRooms(twin, collaborators) {
+  const rooms = [
+    ['成果の部屋', twin.achievements[0]],
+    ['スキルの部屋', twin.skills.join('・')],
+    ['協業の部屋', collaborators.map((person) => areaById[person.area].name).join(' / ') || '今期は個人探究中心'],
+    ['支援の部屋', twin.contribution],
+    ['学習の部屋', twin.growthTheme],
+    ['評価の部屋', '半期成果レポートのたたき台を生成'],
+    ['キャリアの部屋', '履歴書・職務経歴書・社内異動プロフィールへ変換'],
+  ];
+  return `<div class="inside-house"><h4>Work Twinの家の中</h4><div class="room-grid">${rooms.map(([name, text]) => `<div class="room-card"><strong>${name}</strong><span>${text}</span></div>`).join('')}</div></div>`;
+}
+
+function peerVoicesBlock(twin) {
+  return listBlock('住民の声（架空の推薦・支援コメント）', twin.peerVoices);
+}
+
+function visibilityBlock(twin) {
+  const labels = { personal: '本人のみ', manager: '上司に共有', hr: '人事に共有', profile: '社内プロフィールに公開', evaluation: '半期評価レポートに提出' };
+  return `<div class="visibility-box"><h4>公開範囲・提出範囲</h4><p>生ログではなく、AIが要約した成果証跡を本人が選んで提出する想定です。</p><div class="toggle-grid">${Object.entries(labels).map(([key, label]) => `<button data-privacy="${key}" class="privacy-toggle ${twin.visibilitySettings[key] ? 'is-on' : ''}">${label}</button>`).join('')}</div></div>`;
+}
+
+function outputSwitchBlock(twin, matches) {
+  const buttons = [['evaluation', '半期評価レポート'], ['resume', '履歴書用サマリー'], ['relocation', '社内異動プロフィール']];
+  return `<div class="output-box"><h4>Work Twinから生成する出力</h4><div class="output-tabs">${buttons.map(([mode, label]) => `<button data-output="${mode}" class="${outputMode === mode ? 'is-active' : ''}">${label}</button>`).join('')}</div>${generatedOutput(twin, matches)}</div>`;
+}
+
+function generatedOutput(twin, matches) {
+  if (outputMode === 'resume') {
+    return `<div class="generated-output"><strong>履歴書用サマリー</strong><ul><li>担当プロジェクト: ${twin.achievements[0]}</li><li>役割: ${twin.role}</li><li>使用スキル: ${twin.skills.join('、')}</li><li>実績: ${twin.achievements[1] || twin.achievements[0]}</li><li>強み: ${twin.contribution}</li></ul></div>`;
+  }
+  if (outputMode === 'relocation') {
+    return `<div class="generated-output"><strong>社内異動プロフィール</strong><ul><li>得意領域: ${twin.skills.slice(0, 2).join('、')}</li><li>挑戦したい領域: ${twin.growthTheme}</li><li>引っ越し候補部署: ${matches.map(({ vacancy }) => areaById[vacancy.area].name).slice(0, 3).join('、')}</li><li>マッチ理由: 成果の部屋と募集部屋の設備が近く、本人の成長テーマにも接続します。</li><li>推薦コメント: ${twin.peerVoices[0]}</li></ul></div>`;
+  }
+  return `<div class="generated-output"><strong>半期評価レポート</strong><ul><li>今期の成果: ${twin.achievements.join(' / ')}</li><li>成果の根拠: 承認済みの要約証跡、協業の道、住民の声。</li><li>評価コメント案: ${twin.evaluationSummary}</li><li>次期成長テーマ: ${twin.growthTheme}</li></ul></div>`;
+}
+
+function relocationSimulationBlock(twin, vacancy) {
+  const toArea = displayArea(areaById[vacancy.area]);
+  const fromArea = displayArea(areaById[twin.area]);
+  const matchCount = vacancy.requiredSkills.filter((skill) => twin.skills.includes(skill)).length;
+  const matchRate = Math.min(95, 48 + matchCount * 16 + (vacancy.recommendedResidents.includes(twin.id) ? 18 : 0));
+  const improvedShortage = Math.max(0, headcountShortage(toArea) - 1);
+  const improvedWorkload = Math.max(80, toArea.workloadRate - 9);
+  const fromWorkload = fromArea.workloadRate + 5;
+  return `<div class="simulation-box"><h4>引っ越しシミュレーション</h4><p><strong>${twin.name}</strong>が<strong>${areaById[vacancy.area].name}</strong>の「${vacancy.neededRole}」へ引っ越した場合</p><div class="metric-grid"><div><strong>${headcountShortage(toArea)}→${improvedShortage}</strong><span>不足人数</span></div><div><strong>${toArea.workloadRate}%→${improvedWorkload}%</strong><span>先部署逼迫率</span></div><div><strong>${fromArea.workloadRate}%→${fromWorkload}%</strong><span>元部署影響</span></div><div><strong>${matchRate}%</strong><span>スキル相性</span></div></div><ul><li>成長テーマとの相性: ${twin.growthTheme}を実案件で試せます。</li><li>期待される貢献: ${vacancy.mission}</li><li>想定リスク: 元部署のレビュー・引き継ぎ期間を2〜4週間確保する必要があります。</li><li>AI推薦理由: 必要スキル「${vacancy.requiredSkills.join('・')}」とWork Twinの部屋が重なっています。</li></ul></div>`;
+}
+
+function renderPlanningDetail() {
+  detailTitle.textContent = '都市計画モード';
+  const overloaded = displayAreas().filter((area) => area.workloadRate >= 118 || headcountShortage(area) > 0);
+  detailPanel.innerHTML = `<div class="twin-topline"><span>🗺️ 街づくり</span><span>過負荷・空き部屋・協業ハブをハイライト</span></div><h3>会社全体へのAI提案</h3><p class="detail-lead">統制や監視ではなく、支援が必要な場所を街づくりの目線で見つけます。</p>${listBlock('優先的に支援するエリア', overloaded.map((area) => `${area.areaName}: ${area.statusLabel} / 工数逼迫率 ${area.workloadRate}% / 不足 ${headcountShortage(area)}名`))}<div class="evidence-box"><strong>AIによる都市計画案</strong><p>新規事業区・データ分析区へ短期兼務と引っ越し候補を提示し、人事区の育成設計を橋渡しに使う。協業ハブ社員には負荷が集中しないようレビュー時間を守る。</p></div>${listBlock('他部署支援が可能な余力エリア', displayAreas().filter((area) => area.riskLevel === 'low').map((area) => `${area.areaName}: ${area.recommendedAction}`))}`;
 }
 
 function resetReport(message = '社員の家を選択してボタンを押すと、Work Twinの成果証跡からレポート案が表示されます。') {
@@ -573,23 +687,68 @@ generateReport.addEventListener('click', () => {
 
   const twin = twinById[selectedId];
   const collaborators = twin.collaborationIds.map((id) => twinById[id]).filter(Boolean);
-  reportPanel.className = 'report-card';
-  reportPanel.innerHTML = `
-    <h3>${twin.name} 半期成果レポート案</h3>
-    <div class="report-section"><strong>今期の成果サマリー</strong><p>${twin.evaluationSummary}</p></div>
-    ${listBlock('成果の根拠', twin.achievements)}
-    ${pillBlock('発揮されたスキル', twin.skills)}
-    ${listBlock('協業・支援の記録', collaborators.map((person) => `${person.name}（${areaById[person.area].name}）との協業：${person.role}の観点を取り入れた。`))}
-    <div class="report-section"><strong>次期の成長テーマ</strong><p>${twin.growthTheme}</p></div>
-    <div class="comment-draft"><strong>評価コメント案</strong><p>${twin.evaluationSummary} 他者への貢献として「${twin.contribution}」が確認でき、次期は「${twin.growthTheme}」への挑戦が期待されます。</p></div>
-    <div class="report-section"><strong>履歴書・職務経歴書向けサマリー</strong><p>${twin.role}として、${twin.skills.slice(0, 3).join('・')}を活かし、${twin.achievements[0]}。部署横断の協業経験も有する。</p></div>
-  `;
+  const steps = ['Work Twinの成果の部屋を確認中', '協業の道と支援履歴を分析中', '今期の成長テーマを抽出中', '評価コメント案を作成中', '履歴書向けサマリーを生成中'];
+  let index = 0;
+  generateReport.disabled = true;
+  reportPanel.className = 'report-card generating';
+  reportPanel.innerHTML = `<h3>生成中...</h3><ol class="generation-steps">${steps.map((step, i) => `<li class="${i === 0 ? 'is-active' : ''}">${step}</li>`).join('')}</ol>`;
+  const timer = setInterval(() => {
+    index += 1;
+    reportPanel.querySelectorAll('li').forEach((li, i) => li.className = i < index ? 'is-done' : i === index ? 'is-active' : '');
+    if (index >= steps.length) {
+      clearInterval(timer);
+      generateReport.disabled = false;
+      reportPanel.className = 'report-card';
+      reportPanel.innerHTML = `
+        <h3>${twin.name} 半期成果レポート案</h3>
+        <div class="report-section"><strong>今期の成果サマリー</strong><p>${twin.evaluationSummary}</p></div>
+        ${listBlock('成果の根拠', twin.achievements)}
+        ${pillBlock('発揮されたスキル', twin.skills)}
+        ${listBlock('協業・支援の記録', collaborators.map((person) => `${person.name}（${areaById[person.area].name}）との協業：${person.role}の観点を取り入れた。`))}
+        <div class="report-section"><strong>次期の成長テーマ</strong><p>${twin.growthTheme}</p></div>
+        <div class="comment-draft"><strong>評価コメント案</strong><p>${twin.evaluationSummary} 他者への貢献として「${twin.contribution}」が確認でき、次期は「${twin.growthTheme}」への挑戦が期待されます。</p></div>
+        <div class="report-section"><strong>履歴書・職務経歴書向けサマリー</strong><p>${twin.role}として、${twin.skills.slice(0, 3).join('・')}を活かし、${twin.achievements[0]}。部署横断の協業経験も有する。</p></div>
+      `;
+    }
+  }, 320);
+});
+
+periodControls.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-period]');
+  if (!button) return;
+  currentPeriod = button.dataset.period;
+  periodControls.querySelectorAll('button').forEach((item) => item.classList.toggle('is-active', item === button));
+  createMap();
+  renderCompanySummary();
+  render();
+});
+
+modeControls.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-mode]');
+  if (!button) return;
+  currentMode = button.dataset.mode;
+  modeControls.querySelectorAll('button').forEach((item) => item.classList.toggle('is-active', item === button));
+  if (currentMode === 'planning') {
+    selectedType = 'planning';
+    selectedId = 'planning-mode';
+    resetReport('都市計画モードでは、会社全体の支援案を右側に表示します。');
+  } else if (selectedType === 'planning') {
+    selectedType = 'twin';
+    selectedId = activeTwinForMove;
+    resetReport();
+  }
+  createMap();
+  render();
 });
 
 cityMap.addEventListener('click', () => selectArea('planning'));
 detailPanel.addEventListener('click', (event) => {
   const target = event.target.closest('[data-vacancy]');
   if (target) selectVacancy(target.dataset.vacancy);
+  const outputTarget = event.target.closest('[data-output]');
+  if (outputTarget && selectedType === 'twin') { outputMode = outputTarget.dataset.output; renderTwinDetail(); }
+  const privacyTarget = event.target.closest('[data-privacy]');
+  if (privacyTarget && selectedType === 'twin') { const twin = twinById[selectedId]; const key = privacyTarget.dataset.privacy; twin.visibilitySettings[key] = !twin.visibilitySettings[key]; privacyTarget.classList.toggle('is-on', twin.visibilitySettings[key]); }
 });
 
 createMap();
